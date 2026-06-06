@@ -6,6 +6,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   PlusIcon,
+  ArrowsUpDownIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import api from "../services/api";
@@ -60,6 +61,26 @@ function emptySectionForm(nextOrder = 0) {
     ordre: nextOrder,
     image: null,
   };
+}
+
+function getOrderedSections(sections = []) {
+  return [...sections].sort((firstSection, secondSection) => {
+    if ((firstSection.Ordre || 0) !== (secondSection.Ordre || 0)) {
+      return (firstSection.Ordre || 0) - (secondSection.Ordre || 0);
+    }
+    return firstSection.SectionID - secondSection.SectionID;
+  });
+}
+
+function buildSectionFormData(section, ordre) {
+  const formData = new FormData();
+  formData.append("type", section.Type);
+  formData.append("titre", section.Titre || "");
+  formData.append("contenu", section.Contenu || "");
+  formData.append("langage", section.Langage || "javascript");
+  formData.append("texteAlt", section.TexteAlt || "");
+  formData.append("ordre", ordre);
+  return formData;
 }
 
 function SectionForm({ page, onSaved, onCancel, editingSection }) {
@@ -203,7 +224,17 @@ function SectionForm({ page, onSaved, onCancel, editingSection }) {
   );
 }
 
-function SectionPreview({ section, onEdit, onDelete }) {
+function SectionPreview({
+  section,
+  onEdit,
+  onDelete,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragging,
+  dropPosition,
+}) {
   const apiBaseUrl = process.env.REACT_APP_URL_LOCAL;
   const [isCopied, setIsCopied] = useState(false);
 
@@ -218,12 +249,31 @@ function SectionPreview({ section, onEdit, onDelete }) {
   };
 
   return (
-    <article className="rounded-lg border border-sky-500/20 bg-slate-950/60 p-4">
+    <article
+      draggable
+      onDragStart={(event) => onDragStart(event, section)}
+      onDragOver={(event) => onDragOver(event, section)}
+      onDrop={(event) => onDrop(event, section)}
+      onDragEnd={onDragEnd}
+      className={`rounded-lg border bg-slate-950/60 p-4 transition ${
+        isDragging ? "border-sky-300/80 opacity-60" : "border-sky-500/20"
+      } ${
+        dropPosition === "before"
+          ? "ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-950"
+          : dropPosition === "after"
+            ? "ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-950"
+            : ""
+      }`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <span className="inline-flex rounded border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-xs font-semibold uppercase text-sky-200">
-            {section.Type} · ordre {section.Ordre}
-          </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex cursor-grab items-center gap-1 rounded border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-xs font-semibold uppercase text-sky-200 active:cursor-grabbing">
+              <ArrowsUpDownIcon className="h-4 w-4" />
+              {section.Type} · ordre {section.Ordre}
+            </span>
+            <span className="text-xs text-slate-500">Glisser pour déplacer</span>
+          </div>
           {section.Titre && <h4 className="mt-3 text-lg font-semibold text-white">{section.Titre}</h4>}
         </div>
         <div className="flex gap-2">
@@ -273,10 +323,16 @@ export default function PublicPagesAdmin() {
   const [currentUserGrade, setCurrentUserGrade] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [draggedSectionId, setDraggedSectionId] = useState(null);
+  const [dropTarget, setDropTarget] = useState({ sectionId: null, position: null });
 
   const selectedPage = useMemo(
     () => pages.find((page) => page.PageID === selectedPageId) || null,
     [pages, selectedPageId]
+  );
+  const orderedSelectedSections = useMemo(
+    () => getOrderedSections(selectedPage?.Sections || []),
+    [selectedPage]
   );
 
   const fetchPages = async (nextSelectedId) => {
@@ -452,7 +508,146 @@ export default function PublicPagesAdmin() {
     await fetchPages(selectedPage.PageID);
   };
 
+  const handleSectionDragStart = (event, section) => {
+    setDraggedSectionId(section.SectionID);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(section.SectionID));
+  };
+
+  const handleSectionDragOver = (event, section) => {
+    if (!draggedSectionId || draggedSectionId === section.SectionID) return;
+    event.preventDefault();
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
+    setDropTarget({ sectionId: section.SectionID, position });
+  };
+
+  const handleSectionDragEnd = () => {
+    setDraggedSectionId(null);
+    setDropTarget({ sectionId: null, position: null });
+  };
+
+  const handleSectionDrop = async (event, targetSection) => {
+    event.preventDefault();
+
+    const sourceSectionId = draggedSectionId || Number(event.dataTransfer.getData("text/plain"));
+    const position = dropTarget.sectionId === targetSection.SectionID ? dropTarget.position : "before";
+    handleSectionDragEnd();
+
+    if (!selectedPage || !sourceSectionId || sourceSectionId === targetSection.SectionID) return;
+
+    const currentSections = getOrderedSections(selectedPage.Sections || []);
+    const draggedSection = currentSections.find((section) => section.SectionID === sourceSectionId);
+    if (!draggedSection) return;
+
+    const remainingSections = currentSections.filter((section) => section.SectionID !== sourceSectionId);
+    const targetIndex = remainingSections.findIndex((section) => section.SectionID === targetSection.SectionID);
+    if (targetIndex === -1) return;
+
+    const nextSections = [...remainingSections];
+    nextSections.splice(position === "after" ? targetIndex + 1 : targetIndex, 0, draggedSection);
+    const reorderedSections = nextSections.map((section, index) => ({ ...section, Ordre: index + 1 }));
+
+    setPages((prevPages) =>
+      prevPages.map((page) =>
+        page.PageID === selectedPage.PageID ? { ...page, Sections: reorderedSections } : page
+      )
+    );
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      await Promise.all(
+        reorderedSections.map((section) =>
+          api.put(
+            `/pages/${selectedPage.PageID}/sections/${section.SectionID}`,
+            buildSectionFormData(section, section.Ordre)
+          )
+        )
+      );
+      await fetchPages(selectedPage.PageID);
+      setSuccessMessage("Ordre des sections mis à jour.");
+    } catch (error) {
+      await fetchPages(selectedPage.PageID);
+      setErrorMessage(error.response?.data?.error || "Impossible de réordonner les sections.");
+    }
+  };
+
   return (
+    <>
+    <section className="mb-6 overflow-hidden rounded-lg border border-sky-500/30 bg-[linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.9))] shadow-[0_24px_80px_rgba(2,6,23,0.38)]">
+      <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+        <div>
+          <p className="text-xs font-semibold uppercase text-sky-300">Navigation publique</p>
+          <h2 className="mt-1 text-xl font-semibold text-slate-50">Dropdowns / thèmes</h2>
+        </div>
+      </div>
+
+      <div className="space-y-4 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold uppercase text-sky-300">{themeForm.themeId ? "Modifier le thème" : "Créer un thème"}</h3>
+          {themeForm.themeId && (
+            <button type="button" onClick={() => setThemeForm(emptyThemeForm())} className="text-xs font-semibold text-slate-400 hover:text-white">
+              Nouveau thème
+            </button>
+          )}
+        </div>
+
+        <form onSubmit={handleSaveTheme} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_100px_auto]">
+          <div>
+            <label className={labelClassName}>Nom</label>
+            <input className={inputClassName} value={themeForm.nom} onChange={(event) => handleThemeField("nom", event.target.value)} required />
+          </div>
+          <div>
+            <label className={labelClassName}>Slug</label>
+            <input className={inputClassName} value={themeForm.slug} onChange={(event) => handleThemeField("slug", slugify(event.target.value))} required />
+          </div>
+          <div>
+            <label className={labelClassName}>Ordre</label>
+            <input type="number" className={inputClassName} value={themeForm.ordre} onChange={(event) => handleThemeField("ordre", event.target.value)} />
+          </div>
+          <div className="flex items-end">
+            <button type="submit" className="h-10 rounded-md bg-sky-500 px-4 text-sm font-semibold text-white hover:bg-sky-400">
+              {themeForm.themeId ? "Modifier" : "Créer"}
+            </button>
+          </div>
+        </form>
+
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {themes.length === 0 && <p className="text-sm text-slate-400">Aucun thème créé.</p>}
+          {themes.map((theme) => (
+            <div key={theme.ThemeID} className="rounded-md border border-sky-500/20 bg-slate-900/60 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{theme.Nom}</p>
+                  <p className="mt-1 truncate text-xs text-slate-500">
+                    /{theme.Slug} · {theme.Pages?.length || 0} page{theme.Pages?.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button type="button" onClick={() => handleEditTheme(theme)} className="rounded border border-sky-500/30 px-2 py-1 text-xs font-semibold text-sky-100 hover:border-sky-300">
+                    Modifier
+                  </button>
+                  {currentUserGrade === 1 && (theme.Pages?.length || 0) === 0 && (
+                    <button type="button" onClick={() => handleDeleteTheme(theme)} className="rounded border border-rose-500/30 px-2 py-1 text-xs font-semibold text-rose-200 hover:border-rose-300">
+                      Supprimer
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {(errorMessage || successMessage) && (
+      <div className={`mb-6 rounded-md border px-4 py-3 text-sm ${errorMessage ? "border-rose-500/30 bg-rose-500/10 text-rose-200" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"}`}>
+        {errorMessage || successMessage}
+      </div>
+    )}
+
     <section className="overflow-hidden rounded-lg border border-sky-500/30 bg-[linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.9))] shadow-[0_24px_80px_rgba(2,6,23,0.38)]">
       <div className="border-b border-white/10 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -496,69 +691,6 @@ export default function PublicPagesAdmin() {
         </aside>
 
         <div className="space-y-5">
-          {(errorMessage || successMessage) && (
-            <div className={`rounded-md border px-4 py-3 text-sm ${errorMessage ? "border-rose-500/30 bg-rose-500/10 text-rose-200" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"}`}>
-              {errorMessage || successMessage}
-            </div>
-          )}
-
-          <section className="space-y-4 rounded-lg border border-sky-500/20 bg-slate-950/60 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-sm font-semibold uppercase text-sky-300">Dropdowns / thèmes</h3>
-              {themeForm.themeId && (
-                <button type="button" onClick={() => setThemeForm(emptyThemeForm())} className="text-xs font-semibold text-slate-400 hover:text-white">
-                  Nouveau thème
-                </button>
-              )}
-            </div>
-
-            <form onSubmit={handleSaveTheme} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_100px_auto]">
-              <div>
-                <label className={labelClassName}>Nom</label>
-                <input className={inputClassName} value={themeForm.nom} onChange={(event) => handleThemeField("nom", event.target.value)} required />
-              </div>
-              <div>
-                <label className={labelClassName}>Slug</label>
-                <input className={inputClassName} value={themeForm.slug} onChange={(event) => handleThemeField("slug", slugify(event.target.value))} required />
-              </div>
-              <div>
-                <label className={labelClassName}>Ordre</label>
-                <input type="number" className={inputClassName} value={themeForm.ordre} onChange={(event) => handleThemeField("ordre", event.target.value)} />
-              </div>
-              <div className="flex items-end">
-                <button type="submit" className="h-10 rounded-md bg-sky-500 px-4 text-sm font-semibold text-white hover:bg-sky-400">
-                  {themeForm.themeId ? "Modifier" : "Créer"}
-                </button>
-              </div>
-            </form>
-
-            <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {themes.length === 0 && <p className="text-sm text-slate-400">Aucun thème créé.</p>}
-              {themes.map((theme) => (
-                <div key={theme.ThemeID} className="rounded-md border border-sky-500/20 bg-slate-900/60 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{theme.Nom}</p>
-                      <p className="mt-1 truncate text-xs text-slate-500">
-                        /{theme.Slug} · {theme.Pages?.length || 0} page{theme.Pages?.length > 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 gap-2">
-                      <button type="button" onClick={() => handleEditTheme(theme)} className="rounded border border-sky-500/30 px-2 py-1 text-xs font-semibold text-sky-100 hover:border-sky-300">
-                        Modifier
-                      </button>
-                      {currentUserGrade === 1 && (theme.Pages?.length || 0) === 0 && (
-                        <button type="button" onClick={() => handleDeleteTheme(theme)} className="rounded border border-rose-500/30 px-2 py-1 text-xs font-semibold text-rose-200 hover:border-rose-300">
-                          Supprimer
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
           <form onSubmit={handleSavePage} className="space-y-4 rounded-lg border border-sky-500/20 bg-slate-950/60 p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h3 className="text-sm font-semibold uppercase text-sky-300">{selectedPage ? "Modifier la page" : "Créer une page"}</h3>
@@ -621,13 +753,24 @@ export default function PublicPagesAdmin() {
                   <CodeBracketIcon className="h-4 w-4 text-sky-300" />
                   Sections
                 </div>
-                {selectedPage.Sections?.length === 0 && (
+                {orderedSelectedSections.length === 0 && (
                   <p className="rounded-lg border border-sky-500/20 bg-slate-950/60 p-4 text-sm text-slate-400">
                     Cette page n'a pas encore de section.
                   </p>
                 )}
-                {selectedPage.Sections?.map((section) => (
-                  <SectionPreview key={section.SectionID} section={section} onEdit={setEditingSection} onDelete={handleDeleteSection} />
+                {orderedSelectedSections.map((section) => (
+                  <SectionPreview
+                    key={section.SectionID}
+                    section={section}
+                    onEdit={setEditingSection}
+                    onDelete={handleDeleteSection}
+                    onDragStart={handleSectionDragStart}
+                    onDragOver={handleSectionDragOver}
+                    onDrop={handleSectionDrop}
+                    onDragEnd={handleSectionDragEnd}
+                    isDragging={draggedSectionId === section.SectionID}
+                    dropPosition={dropTarget.sectionId === section.SectionID ? dropTarget.position : null}
+                  />
                 ))}
               </div>
             </>
@@ -641,5 +784,6 @@ export default function PublicPagesAdmin() {
         </div>
       </div>
     </section>
+    </>
   );
 }

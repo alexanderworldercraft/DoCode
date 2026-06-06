@@ -2,6 +2,36 @@ import React from "react";
 
 const updates = [
   {
+    version: "0.2.1",
+    title: "Administration des pages dynamiques",
+    date: "6 juin 2026",
+    sections: [
+      {
+        title: "Navigation",
+        items: [
+          "Déplacement de la création des dropdowns et thèmes dans une section dédiée avant les pages dynamiques.",
+          "Séparation visuelle de la gestion des thèmes et de la gestion des pages pour clarifier l'administration.",
+        ],
+      },
+      {
+        title: "Administration",
+        items: [
+          "Ajout du drag and drop sur les blocs de section déjà créés.",
+          "Réordonnancement automatique des sections après déplacement d'un bloc.",
+          "Mise à jour des ordres de toutes les sections concernées afin de conserver une incrémentation propre.",
+        ],
+      },
+      {
+        title: "Expérience",
+        items: [
+          "Ajout d'un indicateur visuel sur les blocs déplaçables.",
+          "Affichage d'un retour de positionnement pendant le déplacement d'une section.",
+          "Mise à jour immédiate de l'affichage après un déplacement réussi.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.0",
     title: "Pages publiques dynamiques",
     date: "6 juin 2026",
