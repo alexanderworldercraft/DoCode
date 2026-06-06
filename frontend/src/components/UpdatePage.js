@@ -2,6 +2,64 @@ import React from "react";
 
 const updates = [
   {
+    version: "0.2.0",
+    title: "Pages publiques dynamiques",
+    date: "6 juin 2026",
+    sections: [
+      {
+        title: "Contenu public",
+        items: [
+          "Ajout de pages publiques dynamiques accessibles via des URLs dédiées en /p/slug.",
+          "Affichage des pages publiées dans la sidebar publique avec prise en charge des brouillons.",
+          "Ajout d'une sidebar commune aux pages publiques et aux pages administrateur.",
+        ],
+      },
+      {
+        title: "Administration",
+        items: [
+          "Ajout d'un CRUD complet pour créer, modifier, publier, dépublier et supprimer les pages publiques.",
+          "Ajout de sections de page administrables : titre, bloc de texte, bloc de code et image.",
+          "Ajout d'un CRUD complet des sections avec suppression indépendante de chaque bloc.",
+          "Restriction de la suppression des pages aux super administrateurs.",
+        ],
+      },
+      {
+        title: "Navigation",
+        items: [
+          "Ajout de dropdowns de sidebar pour classer les pages publiques par thème.",
+          "Ajout d'un CRUD des thèmes par les administrateurs et super administrateurs.",
+          "Restriction de la suppression des thèmes aux super administrateurs, uniquement quand aucune page n'y est rattachée.",
+          "Déplacement du lien Mises à jour vers le bloc de version en bas de sidebar.",
+        ],
+      },
+      {
+        title: "Recherche",
+        items: [
+          "Ajout d'une barre de recherche dans le header principal.",
+          "Recherche par nom de page et par titre de section avec prévisualisation des résultats.",
+          "Navigation directe vers une section depuis les résultats de recherche avec défilement automatique.",
+        ],
+      },
+      {
+        title: "Expérience",
+        items: [
+          "Ajout d'un bouton minimaliste pour copier le contenu des blocs de code.",
+          "Ajout d'un affichage stylisé des blocs de code avec langage visible.",
+          "Redirection vers la page d'accueil après déconnexion.",
+          "Suppression du doublon de lien de connexion dans la sidebar publique.",
+        ],
+      },
+      {
+        title: "Base technique",
+        items: [
+          "Ajout des modèles Prisma PublicPage, PageSection et PageTheme.",
+          "Ajout des migrations de base pour les pages dynamiques, sections et thèmes.",
+          "Stockage local des images de page dans backend/uploads/pages/PageID/SectionID.extension.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.1.0",
     title: "Initialisation DoCode",
     date: "6 juin 2026",

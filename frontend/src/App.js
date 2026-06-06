@@ -10,6 +10,7 @@ import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import FooterPage from './components/FooterPage';
 import UpdatePage from './components/UpdatePage';
 import HomePage from './components/HomePage';
+import PublicPage from './components/PublicPage';
 
 const NameApp = process.env.REACT_APP_NAME + " " + process.env.REACT_APP_VER;
 
@@ -44,6 +45,10 @@ const routesMeta = {
     title: `Mises à jour - ${NameApp}`,
     description: `Consultez l'historique des mises à jour de ${NameApp}.`,
   },
+  "/": {
+    title: `${NameApp}`,
+    description: "Bienvenue sur DoCode.",
+  },
 };
 
 function MetaUpdater() {
@@ -66,7 +71,22 @@ export default function App() {
     <Router>
       <MetaUpdater />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={
+            <AppLayout>
+              <HomePage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/p/:slug"
+          element={
+            <AppLayout>
+              <PublicPage />
+            </AppLayout>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
 
         <Route
@@ -92,11 +112,9 @@ export default function App() {
         <Route
           path="/updates"
           element={
-            <ProtectedRoute>
-              <AppLayout>
-                <UpdatePage />
-              </AppLayout>
-            </ProtectedRoute>
+            <AppLayout>
+              <UpdatePage />
+            </AppLayout>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

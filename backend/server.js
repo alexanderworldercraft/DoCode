@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import userRoutes from "./routes/userRoutes.js";
+import pageRoutes from "./routes/pageRoutes.js";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
 import { prisma as db } from "./services/db.js";
@@ -76,6 +77,7 @@ fastify.register(fastifyMultipart, {
 });
 
 fastify.register(userRoutes, { prefix: "/api/users" });
+fastify.register(pageRoutes, { prefix: "/api/pages" });
 
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, "../frontend/build"),

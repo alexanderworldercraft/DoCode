@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <section className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
+    <main className="text-slate-100">
+      <section className="mx-auto flex max-w-6xl flex-col justify-center py-12">
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-300">DoCode</p>
           <h1 className="mt-5 text-4xl font-black tracking-tight text-white sm:text-6xl">
@@ -30,17 +30,11 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div id="pages" className="mt-16 grid gap-4 md:grid-cols-3">
-          {[
-            ["Présentation", "Une page publique prête à recevoir le contenu principal de DoCode."],
-            ["Services", "Un espace pour décrire les fonctionnalités visibles sans connexion."],
-            ["Contact", "Une base simple pour ajouter les informations de contact ou demandes entrantes."],
-          ].map(([title, description]) => (
-            <article key={title} className="rounded-lg border border-sky-500/20 bg-slate-900/70 p-5">
-              <h2 className="text-lg font-semibold text-white">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
-            </article>
-          ))}
+        <div id="pages" className="mt-16 rounded-lg border border-sky-500/20 bg-slate-900/70 p-5">
+          <h2 className="text-lg font-semibold text-white">Pages publiques</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Les pages publiées apparaissent automatiquement dans la sidebar publique.
+          </p>
         </div>
       </section>
     </main>

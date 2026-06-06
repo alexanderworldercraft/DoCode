@@ -1,0 +1,20 @@
+CREATE TABLE `PageTheme` (
+  `ThemeID` INTEGER NOT NULL AUTO_INCREMENT,
+  `Nom` VARCHAR(100) NOT NULL,
+  `Slug` VARCHAR(120) NOT NULL,
+  `Ordre` INTEGER NOT NULL DEFAULT 0,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  UNIQUE INDEX `PageTheme_Slug_key`(`Slug`),
+  PRIMARY KEY (`ThemeID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `PublicPage`
+  ADD COLUMN `ThemeID` INTEGER NULL;
+
+CREATE INDEX `PublicPage_ThemeID_fkey` ON `PublicPage`(`ThemeID`);
+
+ALTER TABLE `PublicPage`
+  ADD CONSTRAINT `PublicPage_ThemeID_fkey`
+  FOREIGN KEY (`ThemeID`) REFERENCES `PageTheme`(`ThemeID`)
+  ON DELETE SET NULL ON UPDATE CASCADE;

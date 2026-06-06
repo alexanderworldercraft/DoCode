@@ -40,3 +40,46 @@ model Utilisateur {
   @@index([GradeID], map: "Utilisateur_GradeID_fkey")
   @@index([EtatID], map: "Utilisateur_EtatID_fkey")
 }
+
+model PublicPage {
+  PageID      Int           @id @default(autoincrement())
+  ThemeID     Int?
+  Titre       String        @db.VarChar(150)
+  Slug        String        @unique @db.VarChar(160)
+  Description String?       @db.VarChar(255)
+  Ordre       Int           @default(0)
+  EstPubliee  Boolean       @default(false)
+  CreateDate  DateTime      @default(now())
+  UpdateDate  DateTime?
+  Theme       PageTheme?    @relation(fields: [ThemeID], references: [ThemeID], onDelete: SetNull)
+  Sections    PageSection[]
+
+  @@index([ThemeID], map: "PublicPage_ThemeID_fkey")
+}
+
+model PageSection {
+  SectionID   Int        @id @default(autoincrement())
+  PageID      Int
+  Type        String     @db.VarChar(30)
+  Titre       String?    @db.VarChar(150)
+  Contenu     String?    @db.Text
+  Langage     String?    @db.VarChar(50)
+  CheminFichier String?  @db.VarChar(255)
+  TexteAlt    String?    @db.VarChar(150)
+  Ordre       Int        @default(0)
+  CreateDate  DateTime   @default(now())
+  UpdateDate  DateTime?
+  Page        PublicPage @relation(fields: [PageID], references: [PageID], onDelete: Cascade)
+
+  @@index([PageID], map: "PageSection_PageID_fkey")
+}
+
+model PageTheme {
+  ThemeID    Int          @id @default(autoincrement())
+  Nom        String       @db.VarChar(100)
+  Slug       String       @unique @db.VarChar(120)
+  Ordre      Int          @default(0)
+  CreateDate DateTime     @default(now())
+  UpdateDate DateTime?
+  Pages      PublicPage[]
+}

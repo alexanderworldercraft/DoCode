@@ -1,0 +1,33 @@
+CREATE TABLE `PublicPage` (
+  `PageID` INTEGER NOT NULL AUTO_INCREMENT,
+  `Titre` VARCHAR(150) NOT NULL,
+  `Slug` VARCHAR(160) NOT NULL,
+  `Description` VARCHAR(255) NULL,
+  `Ordre` INTEGER NOT NULL DEFAULT 0,
+  `EstPubliee` BOOLEAN NOT NULL DEFAULT false,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  UNIQUE INDEX `PublicPage_Slug_key`(`Slug`),
+  PRIMARY KEY (`PageID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE `PageSection` (
+  `SectionID` INTEGER NOT NULL AUTO_INCREMENT,
+  `PageID` INTEGER NOT NULL,
+  `Type` VARCHAR(30) NOT NULL,
+  `Titre` VARCHAR(150) NULL,
+  `Contenu` TEXT NULL,
+  `Langage` VARCHAR(50) NULL,
+  `CheminFichier` VARCHAR(255) NULL,
+  `TexteAlt` VARCHAR(150) NULL,
+  `Ordre` INTEGER NOT NULL DEFAULT 0,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  INDEX `PageSection_PageID_fkey`(`PageID`),
+  PRIMARY KEY (`SectionID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `PageSection`
+  ADD CONSTRAINT `PageSection_PageID_fkey`
+  FOREIGN KEY (`PageID`) REFERENCES `PublicPage`(`PageID`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
