@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    background:
+        radial-gradient(circle at 22% 14%, rgba(14, 165, 233, 0.18), transparent 34%),
+        linear-gradient(180deg, #020617 0%, #020617 45%, #000 100%);
+    background-attachment: fixed;
+    background-color: #020617;
+}
+
+.docode-app-shell {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    background: transparent;
+}
+
+.docode-app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 38% 0%, rgba(14, 165, 233, 0.14), transparent 32%),
+        linear-gradient(180deg, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.98) 48%, #000 100%);
+    pointer-events: none;
+}
+
+#background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -9999;
+    background:
+        linear-gradient(to top, rgba(0, 0, 0, 0) 0%, #030303 100%),
+        radial-gradient(circle at 50% 100%, #14171b 0%, black 100%);
+}
+
+:root {
+    --color-scrollbar: #0284c7;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar);
+    border-radius: 4px;
+}

@@ -1,0 +1,43 @@
+CREATE TABLE `Etat` (
+  `EtatID` INTEGER NOT NULL AUTO_INCREMENT,
+  `Nom` VARCHAR(100) NOT NULL,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  PRIMARY KEY (`EtatID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE `Grade` (
+  `GradeID` INTEGER NOT NULL AUTO_INCREMENT,
+  `Nom` VARCHAR(50) NOT NULL,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  UNIQUE INDEX `Grade_Nom_key`(`Nom`),
+  PRIMARY KEY (`GradeID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE `Utilisateur` (
+  `UtilisateurID` INTEGER NOT NULL AUTO_INCREMENT,
+  `Surnom` VARCHAR(191) NOT NULL,
+  `MotDePasse` VARCHAR(255) NOT NULL,
+  `CheminImage` VARCHAR(255) NULL,
+  `Email` VARCHAR(100) NOT NULL,
+  `Salt` VARCHAR(255) NOT NULL,
+  `GradeID` INTEGER NOT NULL,
+  `EtatID` INTEGER NOT NULL,
+  `CreateDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `UpdateDate` DATETIME(3) NULL,
+  UNIQUE INDEX `Utilisateur_Surnom_key`(`Surnom`),
+  INDEX `Utilisateur_GradeID_fkey`(`GradeID`),
+  INDEX `Utilisateur_EtatID_fkey`(`EtatID`),
+  PRIMARY KEY (`UtilisateurID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `Utilisateur`
+  ADD CONSTRAINT `Utilisateur_GradeID_fkey`
+  FOREIGN KEY (`GradeID`) REFERENCES `Grade`(`GradeID`)
+  ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE `Utilisateur`
+  ADD CONSTRAINT `Utilisateur_EtatID_fkey`
+  FOREIGN KEY (`EtatID`) REFERENCES `Etat`(`EtatID`)
+  ON DELETE RESTRICT ON UPDATE CASCADE;

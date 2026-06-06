@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Etat {
+  EtatID       Int           @id @default(autoincrement())
+  Nom          String        @db.VarChar(100)
+  CreateDate   DateTime      @default(now())
+  UpdateDate   DateTime?
+  Utilisateurs Utilisateur[]
+}
+
+model Grade {
+  GradeID      Int           @id @default(autoincrement())
+  Nom          String        @unique @db.VarChar(50) // Ex. "Admin", "Utilisateur"
+  CreateDate   DateTime      @default(now())
+  UpdateDate   DateTime?
+  Utilisateurs Utilisateur[] // Relation avec les utilisateurs
+}
+
+model Utilisateur {
+  UtilisateurID Int        @id @default(autoincrement())
+  Surnom        String     @unique
+  MotDePasse    String     @db.VarChar(255)
+  CheminImage   String?    @db.VarChar(255)
+  Email         String     @db.VarChar(100)
+  Salt          String     @db.VarChar(255)
+  GradeID       Int
+  EtatID        Int
+  CreateDate    DateTime   @default(now())
+  UpdateDate    DateTime?
+  Grade         Grade      @relation(fields: [GradeID], references: [GradeID])
+  Etat          Etat       @relation(fields: [EtatID], references: [EtatID])
+
+  @@index([GradeID], map: "Utilisateur_GradeID_fkey")
+  @@index([EtatID], map: "Utilisateur_EtatID_fkey")
+}
