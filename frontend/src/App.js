@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import LoginPage from './components/LoginPage';
@@ -11,8 +11,10 @@ import FooterPage from './components/FooterPage';
 import UpdatePage from './components/UpdatePage';
 import HomePage from './components/HomePage';
 import PublicPage from './components/PublicPage';
+import { ThemeContext } from './theme';
 
 const NameApp = process.env.REACT_APP_NAME + " " + process.env.REACT_APP_VER;
+const THEME_STORAGE_KEY = "docode-theme";
 
 function AppLayout({ children }) {
   return (
@@ -67,58 +69,75 @@ function MetaUpdater() {
 }
 
 export default function App() {
-  return (
-    <Router>
-      <MetaUpdater />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <AppLayout>
-              <HomePage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/p/:slug"
-          element={
-            <AppLayout>
-              <PublicPage />
-            </AppLayout>
-          }
-        />
-        <Route path="/login" element={<LoginPage />} />
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return savedTheme === "light" ? "light" : "dark";
+  });
 
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const themeValue = useMemo(() => ({
+    theme,
+    toggleTheme: () => setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark")),
+  }), [theme]);
+
+  return (
+    <ThemeContext.Provider value={themeValue}>
+      <Router>
+        <MetaUpdater />
+        <Routes>
+          <Route
+            path="/"
+            element={
               <AppLayout>
-                <SettingsPage />
+                <HomePage />
               </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/administration"
-          element={
-            <ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/p/:slug"
+            element={
               <AppLayout>
-                <Administration />
+                <PublicPage />
               </AppLayout>
-            </ProtectedAdminRoute>
-          }
-        />
-        <Route
-          path="/updates"
-          element={
-            <AppLayout>
-              <UpdatePage />
-            </AppLayout>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <SettingsPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/administration"
+            element={
+              <ProtectedAdminRoute>
+                <AppLayout>
+                  <Administration />
+                </AppLayout>
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/updates"
+            element={
+              <AppLayout>
+                <UpdatePage />
+              </AppLayout>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ThemeContext.Provider>
   );
 }

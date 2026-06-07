@@ -7,12 +7,15 @@ import {
   DocumentTextIcon,
   HomeIcon,
   MagnifyingGlassIcon,
+  MoonIcon,
   ShieldCheckIcon,
+  SunIcon,
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import api from "../services/api";
+import { useTheme } from "../theme";
 
 const apiBaseUrl = process.env.REACT_APP_URL_LOCAL;
 const appVersion = process.env.REACT_APP_VER || "0.0.0";
@@ -35,7 +38,7 @@ function DoCodeLogo() {
       <span className="grid size-9 place-items-center rounded-lg border border-sky-400/40 bg-sky-500/15 text-sm font-black text-sky-100">
         DC
       </span>
-      <span className="text-[15px] font-black uppercase tracking-[0.12em] text-white">DoCode</span>
+      <span className="theme-text text-[15px] font-black uppercase tracking-[0.12em]">DoCode</span>
     </Link>
   );
 }
@@ -117,7 +120,7 @@ function SidebarContent({ user, publicLinks, closeMenu }) {
   ];
 
   return (
-    <div className="flex h-full flex-col border-r border-sky-500/20 bg-slate-950/95 text-slate-100 shadow-2xl shadow-sky-950/40 backdrop-blur-xl">
+    <div className="theme-surface-strong flex h-full flex-col border-r text-slate-100 shadow-2xl shadow-sky-950/40 backdrop-blur-xl">
       <div className="flex h-24 items-center px-6">
         <DoCodeLogo />
       </div>
@@ -200,7 +203,7 @@ function HeaderSearch() {
         onFocus={() => setIsFocused(true)}
         onBlur={() => window.setTimeout(() => setIsFocused(false), 140)}
         placeholder="Rechercher une page ou section..."
-        className="h-11 w-full rounded-xl border border-sky-500/20 bg-slate-900/70 pl-10 pr-4 text-sm font-medium text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950"
+        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm font-medium outline-none transition focus:border-sky-400/50"
       />
 
       {showPreview && (
@@ -247,6 +250,25 @@ function HeaderSearch() {
         </div>
       )}
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === "light";
+  const Icon = isLight ? MoonIcon : SunIcon;
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="theme-input inline-flex h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition hover:border-sky-400/45 hover:bg-sky-500/10"
+      aria-label={isLight ? "Activer le thème sombre" : "Activer le thème clair"}
+      title={isLight ? "Thème sombre" : "Thème clair"}
+    >
+      <Icon className="size-5" aria-hidden="true" />
+      <span className="hidden sm:inline">{isLight ? "Sombre" : "Clair"}</span>
+    </button>
   );
 }
 
@@ -342,7 +364,7 @@ export default function Navbar() {
         </Dialog>
       </Transition>
 
-      <header className="sticky top-0 z-30 border-b border-sky-500/10 bg-slate-950/80 backdrop-blur-xl lg:pl-64">
+      <header className="theme-surface sticky top-0 z-30 border-b backdrop-blur-xl lg:pl-64">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-4">
             <button
@@ -354,14 +376,16 @@ export default function Navbar() {
               <Bars3Icon className="size-6" aria-hidden="true" />
             </button>
             <div className="min-w-0">
-              <h1 className="truncate text-2xl font-black text-white">{pageLabel}</h1>
-              <p className="mt-1 truncate text-sm font-medium text-slate-400">
+              <h1 className="theme-text truncate text-2xl font-black">{pageLabel}</h1>
+              <p className="theme-subtle mt-1 truncate text-sm font-medium">
                 {user ? "Espace administrateur DoCode." : "Contenu public DoCode."}
               </p>
             </div>
           </div>
 
           <HeaderSearch />
+
+          <ThemeToggle />
 
           {user ? (
             <Menu as="div" className="relative">

@@ -21,9 +21,9 @@ function PublicSection({ section }) {
 
   if (section.Type === "titre") {
     return (
-      <section id={sectionAnchor} className="scroll-mt-28 border-b border-sky-500/20 pb-5">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-300">{section.Titre}</p>
-        <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+      <section id={sectionAnchor} className="theme-border scroll-mt-28 border-b pb-5">
+        <p className="theme-accent text-sm font-semibold uppercase tracking-[0.18em]">{section.Titre}</p>
+        <h2 className="theme-text mt-3 text-3xl font-black tracking-tight sm:text-4xl">
           {section.Contenu || section.Titre}
         </h2>
       </section>
@@ -33,28 +33,28 @@ function PublicSection({ section }) {
   if (section.Type === "texte") {
     return (
       <section id={sectionAnchor} className="scroll-mt-28">
-        {section.Titre && <h2 className="text-2xl font-bold text-white">{section.Titre}</h2>}
-        <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-slate-300">{section.Contenu}</p>
+        {section.Titre && <h2 className="theme-text text-2xl font-bold">{section.Titre}</h2>}
+        <p className="theme-muted mt-3 whitespace-pre-wrap text-base leading-8">{section.Contenu}</p>
       </section>
     );
   }
 
   if (section.Type === "code") {
     return (
-      <section id={sectionAnchor} className="scroll-mt-28 overflow-hidden rounded-lg border border-sky-500/30 bg-slate-950 shadow-lg shadow-sky-950/30">
-        <div className="flex items-center justify-between gap-3 border-b border-sky-500/20 bg-sky-500/10 px-4 py-3">
+      <section id={sectionAnchor} className="theme-surface-strong scroll-mt-28 overflow-hidden rounded-lg border shadow-lg shadow-sky-950/30">
+        <div className="theme-border theme-accent-bg flex items-center justify-between gap-3 border-b px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-sky-100">
             <CodeBracketIcon className="h-5 w-5 text-sky-300" />
             {section.Titre || "Bloc de code"}
           </div>
           <div className="flex items-center gap-2">
-            <span className="rounded border border-sky-500/30 bg-slate-950/70 px-2 py-1 text-xs font-semibold uppercase text-sky-200">
+            <span className="theme-input rounded border px-2 py-1 text-xs font-semibold uppercase">
               {section.Langage || "text"}
             </span>
             <button
               type="button"
               onClick={handleCopyCode}
-              className="inline-flex items-center gap-1 rounded border border-sky-500/30 bg-slate-950/70 px-2 py-1 text-xs font-semibold text-sky-100 transition hover:border-sky-300 hover:text-white"
+              className="theme-input inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold transition hover:border-sky-300"
               aria-label="Copier le code"
             >
               <ClipboardDocumentIcon className="h-4 w-4" />
@@ -77,7 +77,7 @@ function PublicSection({ section }) {
           alt={section.TexteAlt || section.Titre || ""}
           className="max-h-[34rem] w-full rounded-lg border border-white/10 object-contain"
         />
-        {section.Titre && <figcaption className="mt-3 text-sm text-slate-400">{section.Titre}</figcaption>}
+        {section.Titre && <figcaption className="theme-subtle mt-3 text-sm">{section.Titre}</figcaption>}
       </figure>
     );
   }
@@ -130,7 +130,7 @@ export default function PublicPage() {
   }, [isLoading, page, location.hash]);
 
   if (isLoading) {
-    return <main className="mx-auto max-w-4xl text-slate-300">Chargement de la page...</main>;
+    return <main className="theme-muted mx-auto max-w-4xl">Chargement de la page...</main>;
   }
 
   if (errorMessage) {
@@ -150,14 +150,14 @@ export default function PublicPage() {
   return (
     <main className="mx-auto max-w-4xl">
       <article className="space-y-8">
-        <header className="border-b border-sky-500/20 pb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-300">Page publique</p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">{page.Titre}</h1>
-          {page.Description && <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">{page.Description}</p>}
+        <header className="theme-border border-b pb-8">
+          <p className="theme-accent text-sm font-semibold uppercase tracking-[0.22em]">Page publique</p>
+          <h1 className="theme-text mt-4 text-4xl font-black tracking-tight sm:text-5xl">{page.Titre}</h1>
+          {page.Description && <p className="theme-muted mt-4 max-w-2xl text-lg leading-8">{page.Description}</p>}
         </header>
 
         {page.Sections?.length === 0 && (
-          <p className="rounded-lg border border-sky-500/20 bg-slate-950/60 p-5 text-sm text-slate-400">
+          <p className="theme-surface rounded-lg border p-5 text-sm">
             Cette page ne contient pas encore de section.
           </p>
         )}

@@ -2,6 +2,45 @@ import React from "react";
 
 const updates = [
   {
+    version: "0.2.2",
+    title: "Accessibilité et thème clair",
+    date: "7 juin 2026",
+    sections: [
+      {
+        title: "Thèmes",
+        items: [
+          "Ajout d'un double thème pour conserver le thème sombre actuel et proposer un thème clair plus accessible.",
+          "Ajout d'un bouton de bascule clair/sombre dans le header principal.",
+          "Mémorisation du thème sélectionné dans le navigateur afin de conserver le choix utilisateur.",
+        ],
+      },
+      {
+        title: "Accessibilité",
+        items: [
+          "Ajout de libellés accessibles sur le bouton de changement de thème.",
+          "Amélioration des contrastes en thème clair avec des couleurs de texte, bordures et surfaces dédiées.",
+          "Adaptation de la page de connexion pour permettre le changement de thème avant authentification.",
+        ],
+      },
+      {
+        title: "Interface",
+        items: [
+          "Mise en place de variables CSS globales pour piloter les couleurs de fond, surfaces, textes, bordures et accents.",
+          "Adaptation des pages Accueil, Pages publiques, Administration, Paramètres, Connexion, Footer et Mises à jour au nouveau système de thème.",
+          "Conservation du style visuel DoCode avec les accents bleus et les surfaces sobres dans les deux thèmes.",
+        ],
+      },
+      {
+        title: "Base technique",
+        items: [
+          "Ajout d'un contexte React dédié au thème avec un hook réutilisable.",
+          "Application du thème via l'attribut data-theme sur la racine HTML.",
+          "Validation du build frontend après intégration du système de thème.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.1",
     title: "Administration des pages dynamiques",
     date: "6 juin 2026",
@@ -124,22 +163,22 @@ const updates = [
 
 const UpdatePage = () => {
   return (
-    <main className="mx-auto max-w-5xl grow text-slate-100">
+    <main className="theme-text mx-auto max-w-5xl grow">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-50">Mises à jour</h1>
-        <p className="mt-1 text-sm text-slate-400">Historique des changements importants de DoCode.</p>
+        <h1 className="theme-text text-2xl font-semibold">Mises à jour</h1>
+        <p className="theme-subtle mt-1 text-sm">Historique des changements importants de DoCode.</p>
       </header>
 
       <div className="mt-6 space-y-6">
         {updates.map((update) => (
-          <article key={update.version} className="overflow-hidden rounded-lg border border-sky-500/20 bg-slate-950/70">
-            <div className="border-b border-white/10 p-5">
+          <article key={update.version} className="theme-surface overflow-hidden rounded-lg border">
+            <div className="theme-border border-b p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Version {update.version}</p>
-                  <h2 className="mt-2 text-xl font-semibold text-white">{update.title}</h2>
+                  <p className="theme-accent text-xs font-semibold uppercase tracking-[0.18em]">Version {update.version}</p>
+                  <h2 className="theme-text mt-2 text-xl font-semibold">{update.title}</h2>
                 </div>
-                <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-100">
+                <span className="theme-border theme-accent theme-accent-bg rounded-full border px-3 py-1 text-xs font-semibold">
                   {update.date}
                 </span>
               </div>
@@ -147,9 +186,9 @@ const UpdatePage = () => {
 
             <div className="grid gap-4 p-5 md:grid-cols-2">
               {update.sections.map((section) => (
-                <section key={section.title} className="rounded-lg border border-white/10 bg-slate-900/50 p-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-100">{section.title}</h3>
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                <section key={section.title} className="theme-surface-strong rounded-lg border p-4">
+                  <h3 className="theme-text text-sm font-semibold uppercase tracking-[0.14em]">{section.title}</h3>
+                  <ul className="theme-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-6">
                     {section.items.map((item) => (
                       <li key={item}>{item}</li>
                     ))}

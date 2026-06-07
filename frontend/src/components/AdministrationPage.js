@@ -12,10 +12,10 @@ const AdministrationPage = () => {
 
     return (
         <main className="mx-auto max-w-7xl grow">
-            <div className="space-y-6 text-neutral-100">
+            <div className="theme-text space-y-6">
                 <header>
-                    <h1 className="text-2xl font-semibold text-slate-50">Administration</h1>
-                    <p className="mt-1 text-sm text-slate-400">Gérez les administrateurs et les accès à DoCode.</p>
+                    <h1 className="theme-text text-2xl font-semibold">Administration</h1>
+                    <p className="theme-subtle mt-1 text-sm">Gérez les administrateurs et les accès à DoCode.</p>
                 </header>
 
                 <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,0.42fr)_minmax(0,1fr)]">

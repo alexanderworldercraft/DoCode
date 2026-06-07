@@ -9,8 +9,8 @@ import {
 } from "@heroicons/react/24/outline";
 import ImagePreview from "./ImagePreview";
 
-const inputClassName = "mt-1 block min-h-10 w-full rounded-md border-0 bg-slate-900/80 px-3 py-2 text-slate-100 shadow-sm ring-1 ring-inset ring-slate-700 outline-none placeholder:text-slate-600 focus:ring-2 focus:ring-inset focus:ring-sky-500 sm:text-sm";
-const labelClassName = "block text-xs font-semibold uppercase text-slate-400";
+const inputClassName = "theme-input mt-1 block min-h-10 w-full rounded-md border px-3 py-2 shadow-sm outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500 sm:text-sm";
+const labelClassName = "theme-subtle block text-xs font-semibold uppercase";
 
 const UpdateSettings = () => {
   const [user, setUser] = useState({});
@@ -104,14 +104,14 @@ const UpdateSettings = () => {
   };
 
   return (
-    <section className="overflow-hidden rounded-lg border border-sky-500/30 bg-[radial-gradient(circle_at_20%_10%,rgba(14,165,233,0.16),transparent_30%),linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.9))] shadow-[0_24px_80px_rgba(2,6,23,0.38)]">
-      <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+    <section className="theme-surface overflow-hidden rounded-lg border">
+      <div className="theme-border border-b px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase text-sky-300">Profil</p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-50">Informations personnelles</h2>
+            <h2 className="theme-text mt-1 text-xl font-semibold">Informations personnelles</h2>
           </div>
-          <span className="inline-flex items-center gap-2 rounded border border-sky-500/20 bg-slate-900/70 px-3 py-1.5 text-xs text-slate-200">
+          <span className="theme-input inline-flex items-center gap-2 rounded border px-3 py-1.5 text-xs">
             <UserCircleIcon className="h-4 w-4 text-sky-300" />
             {user?.Surnom || "Compte"}
           </span>
@@ -132,8 +132,8 @@ const UpdateSettings = () => {
         )}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.42fr)]">
-          <div className="min-w-0 rounded-lg border border-sky-500/20 bg-slate-950/60 p-5">
-            <h3 className="text-base font-semibold text-slate-50">Identité et sécurité</h3>
+          <div className="theme-surface-strong min-w-0 rounded-lg border p-5">
+            <h3 className="theme-text text-base font-semibold">Identité et sécurité</h3>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div>
                 <label className={labelClassName}>Surnom</label>
@@ -198,10 +198,10 @@ const UpdateSettings = () => {
             </div>
           </div>
 
-          <aside className="min-w-0 rounded-lg border border-sky-500/20 bg-slate-950/60 p-5">
+          <aside className="theme-surface-strong min-w-0 rounded-lg border p-5">
             <div className="flex items-center gap-2">
               <PhotoIcon className="h-5 w-5 text-sky-300" />
-              <h3 className="text-base font-semibold text-slate-50">Photo de profil</h3>
+              <h3 className="theme-text text-base font-semibold">Photo de profil</h3>
             </div>
             <div className="mt-5">
               <ImagePreview
@@ -209,7 +209,7 @@ const UpdateSettings = () => {
                 onImageSelect={handleImageSelect}
               />
             </div>
-            <label htmlFor="removeImage" className="mt-5 flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-slate-900/50 p-3 text-sm text-slate-300 hover:border-sky-500/30">
+            <label htmlFor="removeImage" className="theme-input mt-5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm hover:border-sky-500/30">
               <input
                 id="removeImage"
                 name="removeImage"
@@ -223,7 +223,7 @@ const UpdateSettings = () => {
           </aside>
         </div>
 
-        <div className="mt-6 flex justify-end border-t border-white/10 pt-4">
+        <div className="theme-border mt-6 flex justify-end border-t pt-4">
           <button
             type="submit"
             className="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-400"
