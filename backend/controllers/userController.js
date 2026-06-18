@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { backupDatabase } from '../services/backupService.js';
 
 // Recrée __dirname pour les modules ES
 const __filename = fileURLToPath(import.meta.url);
@@ -154,6 +155,42 @@ export const userController = {
     } catch (err) {
       console.error('Error in login:', err);
       reply.status(500).send({ error: 'Internal Server Error', message: err.message });
+    }
+  },
+
+  async createManualBackup(request, reply) {
+    try {
+      const requester = await userRepository.getUserById(request.user?.userId);
+      if (!requester || requester.GradeID !== 1) {
+        return reply.status(403).send({ error: 'Seul un super administrateur peut créer une sauvegarde manuelle.' });
+      }
+
+      if (requester.EtatID !== 1) {
+        return reply.status(403).send({ error: 'Votre compte doit être actif pour créer une sauvegarde.' });
+      }
+
+      const { motDePasse, nomDeLaSave } = request.body || {};
+      if (!motDePasse) {
+        return reply.status(400).send({ error: 'Mot de passe requis pour valider la sauvegarde.' });
+      }
+
+      const isPasswordValid = await bcrypt.compare(motDePasse, requester.MotDePasse);
+      if (!isPasswordValid) {
+        return reply.status(401).send({ error: 'Mot de passe invalide.' });
+      }
+
+      const { fileName, filePath } = await backupDatabase({
+        manual: true,
+        backupName: nomDeLaSave,
+      });
+
+      return reply
+        .header('Content-Type', 'application/sql')
+        .header('Content-Disposition', `attachment; filename="${fileName}"`)
+        .send(fs.createReadStream(filePath));
+    } catch (err) {
+      console.error('Error in createManualBackup:', err);
+      reply.status(500).send({ error: 'Erreur lors de la sauvegarde.', message: err.message });
     }
   },
 

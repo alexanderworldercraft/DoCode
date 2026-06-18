@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import bcrypt from "bcrypt";
+import fs from "fs";
 import { userController } from "../controllers/userController.js";
 import { userRepository } from "../models/user.js";
+import * as backupService from "../services/backupService.js";
 
 function multipartRequest(fields, userId = 1) {
   return {
@@ -17,6 +19,7 @@ function multipartRequest(fields, userId = 1) {
 function replyMock() {
   return {
     send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
     status: vi.fn().mockReturnThis(),
   };
 }
@@ -69,5 +72,37 @@ describe("userController", () => {
     expect(reply.send).toHaveBeenCalledWith(expect.objectContaining({
       token: expect.any(String),
     }));
+  });
+
+  it("creates a manual backup for an active super admin with a valid password", async () => {
+    const motDePasse = "Admin123!";
+    const hashedPassword = await bcrypt.hash(motDePasse, 10);
+    const request = {
+      user: { userId: 1 },
+      body: { motDePasse, nomDeLaSave: "avant-tempete" },
+    };
+    const reply = replyMock();
+    const fakeStream = { pipe: vi.fn() };
+
+    vi.spyOn(userRepository, "getUserById").mockResolvedValue({
+      UtilisateurID: 1,
+      MotDePasse: hashedPassword,
+      EtatID: 1,
+      GradeID: 1,
+    });
+    vi.spyOn(backupService, "backupDatabase").mockResolvedValue({
+      fileName: "avant-tempete.sql",
+      filePath: "/tmp/avant-tempete.sql",
+    });
+    vi.spyOn(fs, "createReadStream").mockReturnValue(fakeStream);
+
+    await userController.createManualBackup(request, reply);
+
+    expect(backupService.backupDatabase).toHaveBeenCalledWith({
+      manual: true,
+      backupName: "avant-tempete",
+    });
+    expect(reply.header).toHaveBeenCalledWith("Content-Disposition", 'attachment; filename="avant-tempete.sql"');
+    expect(reply.send).toHaveBeenCalledWith(fakeStream);
   });
 });

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import FormNewAdmin from "./FormNewAdmin";
 import AdminList from "./AdminList";
 import PublicPagesAdmin from "./PublicPagesAdmin";
+import ManualBackup from "./ManualBackup";
 
 const AdministrationPage = () => {
     const [reload, setReload] = useState(false);
@@ -22,6 +23,8 @@ const AdministrationPage = () => {
                     <FormNewAdmin onCreated={handleStateChange} />
                     <AdminList key={reload} onStateChange={handleStateChange} />
                 </section>
+
+                <ManualBackup />
 
                 <PublicPagesAdmin />
             </div>

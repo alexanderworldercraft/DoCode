@@ -16,6 +16,7 @@ function multipartRequest(fields, userId = 1) {
 function replyMock() {
   return {
     send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
     status: vi.fn().mockReturnThis(),
   };
 }
@@ -65,5 +66,22 @@ describe("userController - error cases", () => {
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ error: "Invalid credentials" });
+  });
+
+  it("rejects manual backup when requester is not super admin", async () => {
+    const request = {
+      user: { userId: 1 },
+      body: { motDePasse: "Admin123!" },
+    };
+    const reply = replyMock();
+
+    vi.spyOn(userRepository, "getUserById").mockResolvedValue({ UtilisateurID: 1, GradeID: 2 });
+
+    await userController.createManualBackup(request, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(403);
+    expect(reply.send).toHaveBeenCalledWith({
+      error: "Seul un super administrateur peut créer une sauvegarde manuelle.",
+    });
   });
 });

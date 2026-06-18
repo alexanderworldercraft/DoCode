@@ -2,6 +2,45 @@ import React from "react";
 
 const updates = [
   {
+    version: "0.2.3",
+    title: "Sauvegarde manuelle sécurisée",
+    date: "18 juin 2026",
+    sections: [
+      {
+        title: "Administration",
+        items: [
+          "Ajout d'une section Sauvegarde manuelle sur la page Administration.",
+          "Accès limité au super administrateur avec vérification du grade côté interface et côté API.",
+          "Validation obligatoire par le mot de passe du super administrateur avant de lancer la sauvegarde.",
+        ],
+      },
+      {
+        title: "Sauvegarde",
+        items: [
+          "Création d'une sauvegarde SQL immédiate de la base de données depuis l'administration.",
+          "Stockage automatique d'une copie serveur dans backend/uploads/BDD avec un nom de fichier dédié.",
+          "Téléchargement immédiat d'une seconde copie sur l'appareil utilisé pour disposer rapidement d'une double sauvegarde.",
+        ],
+      },
+      {
+        title: "Sécurité",
+        items: [
+          "Ajout d'une route API protégée pour empêcher les administrateurs simples de déclencher une sauvegarde.",
+          "Refus de la sauvegarde si le compte super administrateur n'est pas actif.",
+          "Nettoyage du nom de sauvegarde fourni afin de produire un fichier SQL exploitable sans caractères dangereux.",
+        ],
+      },
+      {
+        title: "Base technique",
+        items: [
+          "Extraction de la logique de dump SQL dans un service backend réutilisable par la sauvegarde automatique et manuelle.",
+          "Remplacement de la commande shell de sauvegarde par un appel mysqldump paramétré via processus dédié.",
+          "Ajout de tests backend pour couvrir le succès superadmin et le refus des comptes non superadmin.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.2",
     title: "Accessibilité et thème clair",
     date: "7 juin 2026",

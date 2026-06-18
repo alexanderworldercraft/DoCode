@@ -6,6 +6,7 @@ import { userRepository } from '../models/user.js';
 // Ajout des schema pour la documentation des routes.
 export default async function userRoutes(fastify, options) {
   fastify.post('/admins', { preHandler: authMiddleware }, userController.createAdmin);
+  fastify.post('/manual-backup', { preHandler: authMiddleware }, userController.createManualBackup);
   fastify.post('/login', userController.login);
   fastify.put('/update', { preHandler: authMiddleware }, userController.updateUser);
   fastify.delete('/delete-profile-image', { preHandler: authMiddleware }, userController.deleteProfileImage);

@@ -8,9 +8,9 @@ import pageRoutes from "./routes/pageRoutes.js";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
 import { prisma as db } from "./services/db.js";
+import { backupDatabase } from "./services/backupService.js";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
-import { exec } from "child_process";
 import cron from "node-cron";
 
 const PUBLIC_URL = process.env.PUBLIC_URL;
@@ -107,46 +107,19 @@ function keepDatabaseAlive() {
 
 setInterval(keepDatabaseAlive, 25200000);
 
-const DB_HOST = process.env.DB_HOST;
-const DB_USER = process.env.DB_USER;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_NAME;
-const BACKUP_DIR = path.join(__dirname, "uploads/BDD");
-
-if (!fs.existsSync(BACKUP_DIR)) {
-  fs.mkdirSync(BACKUP_DIR, { recursive: true });
-}
-
-function backupDatabase() {
-  if (!DB_HOST || !DB_USER || !DB_NAME) return;
-
-  const timestamp = new Date();
-  const year = timestamp.getFullYear();
-  const month = String(timestamp.getMonth() + 1).padStart(2, "0");
-  const day = String(timestamp.getDate()).padStart(2, "0");
-  const backupFile = path.join(BACKUP_DIR, `BDD_${DB_NAME}_${year}-${month}-${day}.sql`);
-  const command = `mysqldump -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD || ""} ${DB_NAME} > ${backupFile}`;
-
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      fastify.log.error(`Erreur lors de la sauvegarde : ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      fastify.log.error(`Erreur stderr : ${stderr}`);
-      return;
-    }
-    fastify.log.info(`Sauvegarde créée avec succès : ${backupFile}`);
-  });
-}
-
 const backupDayOfWeek = process.env.BACKUP_DAY_OF_WEEK || "0";
 const backupTime = process.env.BACKUP_TIME || "00:00";
 const [hours, minutes] = backupTime.split(":");
 
 cron.schedule(`${minutes} ${hours} * * ${backupDayOfWeek}`, () => {
   console.log("Démarrage de la sauvegarde hebdomadaire...");
-  backupDatabase();
+  backupDatabase()
+    .then(({ filePath }) => {
+      fastify.log.info(`Sauvegarde créée avec succès : ${filePath}`);
+    })
+    .catch((error) => {
+      fastify.log.error(`Erreur lors de la sauvegarde : ${error.message}`);
+    });
 });
 
 const start = async () => {
