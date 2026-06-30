@@ -7,7 +7,7 @@ import { userRepository } from "../models/user.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const allowedSectionTypes = new Set(["titre", "texte", "code", "image"]);
+const allowedSectionTypes = new Set(["titre", "texte", "liste", "code", "image"]);
 
 function parseBoolean(value) {
   return value === true || value === "true" || value === "1";
@@ -127,6 +127,7 @@ function buildThemePayload(body) {
 
 function buildSectionPayload(rawFields, pageId) {
   const type = String(rawFields?.type || "").trim();
+  const langage = rawFields?.langage ? String(rawFields.langage).trim() : "";
 
   if (!allowedSectionTypes.has(type)) {
     return { error: "Type de section invalide." };
@@ -138,7 +139,7 @@ function buildSectionPayload(rawFields, pageId) {
       Type: type,
       Titre: rawFields?.titre ? String(rawFields.titre).trim() : null,
       Contenu: rawFields?.contenu ? String(rawFields.contenu) : null,
-      Langage: type === "code" && rawFields?.langage ? String(rawFields.langage).trim() : null,
+      Langage: type === "code" && langage ? langage : type === "liste" ? (langage === "ordered" ? "ordered" : "unordered") : null,
       TexteAlt: type === "image" && rawFields?.texteAlt ? String(rawFields.texteAlt).trim() : null,
       Ordre: Number(rawFields?.ordre || 0),
     },

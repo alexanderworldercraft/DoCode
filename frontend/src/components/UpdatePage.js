@@ -2,6 +2,45 @@ import React from "react";
 
 const updates = [
   {
+    version: "0.2.4",
+    title: "Listes administrables",
+    date: "30 juin 2026",
+    sections: [
+      {
+        title: "Administration",
+        items: [
+          "Ajout d'un nouveau type de section Liste dans le formulaire Ajouter une section.",
+          "Ajout d'un choix entre liste ordonnée et liste désordonnée pour adapter l'affichage du contenu.",
+          "Saisie des éléments de liste ligne par ligne depuis le champ de contenu de la section.",
+        ],
+      },
+      {
+        title: "Contenu public",
+        items: [
+          "Affichage des listes sur les pages publiques avec rendu ordonné ou désordonné selon le choix administrateur.",
+          "Ajout de la prévisualisation des listes directement dans les sections existantes de l'administration.",
+          "Conservation du style visuel des pages publiques avec les espacements et couleurs de thème existants.",
+        ],
+      },
+      {
+        title: "Expérience",
+        items: [
+          "Défilement automatique vers le formulaire de modification après clic sur le bouton Modifier d'une section.",
+          "Retour plus direct à la zone d'édition pour éviter de devoir remonter manuellement dans les pages longues.",
+          "Préservation du fonctionnement existant de création, modification, suppression et réordonnancement des sections.",
+        ],
+      },
+      {
+        title: "Base technique",
+        items: [
+          "Ajout du type liste dans la validation API des sections.",
+          "Stockage du choix ordonnée ou désordonnée dans le champ existant de section afin d'éviter une migration de base.",
+          "Validation du build frontend après intégration des listes et du défilement automatique.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.3",
     title: "Sauvegarde manuelle sécurisée",
     date: "18 juin 2026",

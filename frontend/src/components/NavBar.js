@@ -64,7 +64,7 @@ function NavItem({ item, closeMenu }) {
 }
 
 function ThemeDropdown({ theme, closeMenu }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="space-y-1">
@@ -125,7 +125,7 @@ function SidebarContent({ user, publicLinks, closeMenu }) {
         <DoCodeLogo />
       </div>
 
-      <nav className="flex-1 space-y-2 px-4">
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4">
         {navItems.map((item) => (
           <NavItem key={item.name} item={item} closeMenu={closeMenu} />
         ))}

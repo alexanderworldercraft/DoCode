@@ -5,9 +5,21 @@ import api from "../services/api";
 
 const apiBaseUrl = process.env.REACT_APP_URL_LOCAL;
 
+function getListItems(content) {
+  return String(content || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isOrderedList(section) {
+  return section?.Type === "liste" && section?.Langage === "ordered";
+}
+
 function PublicSection({ section }) {
   const [isCopied, setIsCopied] = useState(false);
   const sectionAnchor = `section-${section.SectionID}`;
+  const ListTag = isOrderedList(section) ? "ol" : "ul";
 
   const handleCopyCode = async () => {
     try {
@@ -35,6 +47,19 @@ function PublicSection({ section }) {
       <section id={sectionAnchor} className="scroll-mt-28">
         {section.Titre && <h2 className="theme-text text-2xl font-bold">{section.Titre}</h2>}
         <p className="theme-muted mt-3 whitespace-pre-wrap text-base leading-8">{section.Contenu}</p>
+      </section>
+    );
+  }
+
+  if (section.Type === "liste") {
+    return (
+      <section id={sectionAnchor} className="scroll-mt-28">
+        {section.Titre && <h2 className="theme-text text-2xl font-bold">{section.Titre}</h2>}
+        <ListTag className={`theme-muted mt-3 space-y-2 pl-5 text-base leading-8 ${isOrderedList(section) ? "list-decimal" : "list-disc"}`}>
+          {getListItems(section.Contenu).map((item, index) => (
+            <li key={`${section.SectionID}-item-${index}`}>{item}</li>
+          ))}
+        </ListTag>
       </section>
     );
   }

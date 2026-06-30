@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ClipboardDocumentIcon,
   CodeBracketIcon,
@@ -16,6 +16,7 @@ const labelClassName = "block text-xs font-semibold uppercase text-slate-400";
 const sectionTypes = [
   { value: "titre", label: "Titre" },
   { value: "texte", label: "Bloc de texte" },
+  { value: "liste", label: "Liste" },
   { value: "code", label: "Bloc de code" },
   { value: "image", label: "Image" },
 ];
@@ -72,6 +73,17 @@ function getOrderedSections(sections = []) {
   });
 }
 
+function getListItems(content) {
+  return String(content || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isOrderedList(section) {
+  return section?.Type === "liste" && section?.Langage === "ordered";
+}
+
 function buildSectionFormData(section, ordre) {
   const formData = new FormData();
   formData.append("type", section.Type);
@@ -108,6 +120,18 @@ function SectionForm({ page, onSaved, onCancel, editingSection }) {
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleTypeChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      type: value,
+      langage: value === "liste"
+        ? prev.langage === "ordered" ? "ordered" : "unordered"
+        : value === "code" && (prev.type === "liste" || !prev.langage)
+          ? "javascript"
+          : prev.langage,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -163,7 +187,7 @@ function SectionForm({ page, onSaved, onCancel, editingSection }) {
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
         <div>
           <label className={labelClassName}>Type</label>
-          <select className={inputClassName} value={form.type} onChange={(event) => handleChange("type", event.target.value)}>
+          <select className={inputClassName} value={form.type} onChange={(event) => handleTypeChange(event.target.value)}>
             {sectionTypes.map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>
             ))}
@@ -187,9 +211,21 @@ function SectionForm({ page, onSaved, onCancel, editingSection }) {
         </div>
       )}
 
+      {form.type === "liste" && (
+        <div>
+          <label className={labelClassName}>Type de liste</label>
+          <select className={inputClassName} value={form.langage === "ordered" ? "ordered" : "unordered"} onChange={(event) => handleChange("langage", event.target.value)}>
+            <option value="unordered">Désordonnée</option>
+            <option value="ordered">Ordonnée</option>
+          </select>
+        </div>
+      )}
+
       {form.type !== "image" && (
         <div>
-          <label className={labelClassName}>{form.type === "code" ? "Code" : "Contenu"}</label>
+          <label className={labelClassName}>
+            {form.type === "code" ? "Code" : form.type === "liste" ? "Éléments de liste (un par ligne)" : "Contenu"}
+          </label>
           <textarea
             className={`${inputClassName} min-h-32 font-mono ${form.type === "code" ? "text-sky-100" : "font-sans"}`}
             value={form.contenu}
@@ -237,6 +273,7 @@ function SectionPreview({
 }) {
   const apiBaseUrl = process.env.REACT_APP_URL_LOCAL;
   const [isCopied, setIsCopied] = useState(false);
+  const ListTag = isOrderedList(section) ? "ol" : "ul";
 
   const handleCopyCode = async () => {
     try {
@@ -286,6 +323,13 @@ function SectionPreview({
         </div>
       </div>
       {section.Type === "texte" && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-300">{section.Contenu}</p>}
+      {section.Type === "liste" && (
+        <ListTag className={`mt-3 space-y-2 pl-5 text-sm leading-6 text-slate-300 ${isOrderedList(section) ? "list-decimal" : "list-disc"}`}>
+          {getListItems(section.Contenu).map((item, index) => (
+            <li key={`${section.SectionID}-item-${index}`}>{item}</li>
+          ))}
+        </ListTag>
+      )}
       {section.Type === "titre" && <p className="mt-3 text-2xl font-black text-white">{section.Contenu || section.Titre}</p>}
       {section.Type === "code" && (
         <div className="mt-3 overflow-hidden rounded-lg border border-sky-500/30 bg-slate-950 shadow-inner shadow-sky-950/50">
@@ -325,6 +369,7 @@ export default function PublicPagesAdmin() {
   const [successMessage, setSuccessMessage] = useState("");
   const [draggedSectionId, setDraggedSectionId] = useState(null);
   const [dropTarget, setDropTarget] = useState({ sectionId: null, position: null });
+  const sectionFormRef = useRef(null);
 
   const selectedPage = useMemo(
     () => pages.find((page) => page.PageID === selectedPageId) || null,
@@ -506,6 +551,13 @@ export default function PublicPagesAdmin() {
 
     await api.delete(`/pages/${selectedPage.PageID}/sections/${section.SectionID}`);
     await fetchPages(selectedPage.PageID);
+  };
+
+  const handleEditSection = (section) => {
+    setEditingSection(section);
+    window.setTimeout(() => {
+      sectionFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
   };
 
   const handleSectionDragStart = (event, section) => {
@@ -746,7 +798,9 @@ export default function PublicPagesAdmin() {
 
           {selectedPage && (
             <>
-              <SectionForm page={selectedPage} editingSection={editingSection} onCancel={() => setEditingSection(null)} onSaved={() => fetchPages(selectedPage.PageID)} />
+              <div ref={sectionFormRef} className="scroll-mt-28">
+                <SectionForm page={selectedPage} editingSection={editingSection} onCancel={() => setEditingSection(null)} onSaved={() => fetchPages(selectedPage.PageID)} />
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold uppercase text-slate-400">
@@ -762,7 +816,7 @@ export default function PublicPagesAdmin() {
                   <SectionPreview
                     key={section.SectionID}
                     section={section}
-                    onEdit={setEditingSection}
+                    onEdit={handleEditSection}
                     onDelete={handleDeleteSection}
                     onDragStart={handleSectionDragStart}
                     onDragOver={handleSectionDragOver}
